@@ -93,6 +93,12 @@ local GAMES = {
         PlaceId   = 85738654635245,
         ScriptURL = "https://cdn.jsdelivr.net/gh/euloxa/Universal@refs/heads/main/scripts/climbforanimals.lua",
     },
+    {
+        Name    = "Forester",
+        Subtitle   = "Freemium Roblox Scripts",
+        PlaceId   = 117020342702668,
+        ScriptURL = "https://cdn.jsdelivr.net/gh/euloxa/Universal@refs/heads/main/scripts/forester.lua",
+    },
 }
 
 local CONFIG = {
