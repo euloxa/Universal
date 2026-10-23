@@ -99,6 +99,12 @@ local GAMES = {
         PlaceId   = 117020342702668,
         ScriptURL = "https://cdn.jsdelivr.net/gh/euloxa/Universal@refs/heads/main/scripts/forester.lua",
     },
+    {
+        Name    = "DOORS",
+        Subtitle   = "Freemium Roblox Scripts",
+        PlaceId   = 6839171747,
+        ScriptURL = "https://cdn.jsdelivr.net/gh/euloxa/Universal@refs/heads/main/scripts/doors.lua",
+    },
 }
 
 local CONFIG = {
