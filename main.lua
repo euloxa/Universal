@@ -105,6 +105,12 @@ local GAMES = {
         PlaceId   = 6839171747,
         ScriptURL = "https://cdn.jsdelivr.net/gh/euloxa/Universal@refs/heads/main/scripts/doors.lua",
     },
+    {
+        Name    = "Flee The Facilityl",
+        Subtitle   = "Freemium Roblox Scripts",
+        PlaceId   = 893973440,
+        ScriptURL = "https://cdn.jsdelivr.net/gh/euloxa/Universal@refs/heads/main/scripts/ftf.lua",
+    },
 }
 
 local CONFIG = {
