@@ -82,10 +82,10 @@ local GAMES = {
         ScriptURL = "https://cdn.jsdelivr.net/gh/euloxa/Universal@refs/heads/main/scripts/prehistoricfarm.lua",
     },
     {
-        Name    = "Ride A Fish",
+        Name    = "Fish Riders",
         Subtitle   = "Freemium Roblox Scripts",
-        PlaceId   = 104050046639813,
-        ScriptURL = "https://cdn.jsdelivr.net/gh/euloxa/Universal@refs/heads/main/scripts/rideafish.lua",
+        PlaceId   = 119672433229947,
+        ScriptURL = "https://cdn.jsdelivr.net/gh/euloxa/Universal@refs/heads/main/scripts/fishriders.lua",
     },
     {
         Name    = "Climb For Animals Egg",
