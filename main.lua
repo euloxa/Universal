@@ -111,6 +111,12 @@ local GAMES = {
         PlaceId   = 893973440,
         ScriptURL = "https://cdn.jsdelivr.net/gh/euloxa/Universal@refs/heads/main/scripts/ftf.lua",
     },
+    {
+        Name    = "Violence District",
+        Subtitle   = "Freemium Roblox Scripts",
+        PlaceIds   = { 6739698191, 93978595733734, 9245727061 },
+        ScriptURL = "https://cdn.jsdelivr.net/gh/euloxa/Universal@refs/heads/main/scripts/ftf.lua",
+    },
 }
 
 local CONFIG = {
