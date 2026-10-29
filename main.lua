@@ -117,6 +117,12 @@ local GAMES = {
         PlaceIds   = { 6739698191, 93978595733734, 9245727061 },
         ScriptURL = "https://cdn.jsdelivr.net/gh/euloxa/Universal@refs/heads/main/scripts/violencedistrict.lua",
     },
+    {
+        Name    = "Blade Ball",
+        Subtitle   = "Freemium Roblox Scripts",
+        PlaceIds   = { 1712764003 },
+        ScriptURL = "https://cdn.jsdelivr.net/gh/euloxa/Universal@refs/heads/main/scripts/bladeball.lua",
+    },
 }
 
 local CONFIG = {
