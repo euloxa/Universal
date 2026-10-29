@@ -120,7 +120,7 @@ local GAMES = {
     {
         Name    = "Blade Ball",
         Subtitle   = "Freemium Roblox Scripts",
-        PlaceIds   = { 1712764003 },
+        PlaceIds   = { 13772394625, 1712764003, 76007646, 4777817887 },
         ScriptURL = "https://cdn.jsdelivr.net/gh/euloxa/Universal@refs/heads/main/scripts/bladeball.lua",
     },
 }
