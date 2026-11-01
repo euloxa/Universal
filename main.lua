@@ -60,7 +60,7 @@ local GAMES = {
     {
         Name    = "Sniper Arena",
         Subtitle   = "Freemium Roblox Scripts",
-        PlaceId   = 122446657157717,
+        PlaceIds   = { 122446657157717, 1496356266, 9534705677, 359947889 },
         ScriptURL = "https://cdn.jsdelivr.net/gh/euloxa/Universal@refs/heads/main/scripts/sniperarena.lua",
     },
     {
