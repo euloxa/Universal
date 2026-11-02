@@ -6,7 +6,8 @@ local GAMES = {
     {
         Name      = "The Morgue Shift",
         Subtitle  = "Freemium Roblox Scripts",
-        PlaceIds   = { 126025038789852,122093998639862, 98049867659682, 82572839415010 },
+        GameId    = 9792551117,
+        PlaceId   = 122093998639862,
         ScriptURL = "https://cdn.jsdelivr.net/gh/euloxa/Universal@refs/heads/main/scripts/themorgueshift.lua",
     },
     {
@@ -30,7 +31,8 @@ local GAMES = {
     {
         Name    = "Dueling Grounds",
         Subtitle  = "Freemium Roblox Scripts",
-        PlaceIds  = { 94217045453265, 9051406594, 100484168444874 },
+        GameId = 9051406594,
+        PlaceIds  = 100484168444874,
         ScriptURL = "https://cdn.jsdelivr.net/gh/euloxa/Universal@refs/heads/main/scripts/duelinggrounds.lua",
     },
     {
