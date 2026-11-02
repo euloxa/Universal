@@ -721,21 +721,22 @@ end)
 
 local ContentArea = Instance.new("Frame")
 ContentArea.Position = UDim2.fromOffset(12, 168)
-ContentArea.Size = UDim2.new(1, -24, 1, -180)
+ContentArea.Size = UDim2.new(1, -24, 0, 160)
 ContentArea.BackgroundTransparency = 1
-ContentArea.ClipsDescendants = true
+ContentArea.ClipsDescendants = false
 ContentArea.ZIndex = 5
 ContentArea.Parent = Root
 
 local KeyPage = Instance.new("Frame")
 KeyPage.Name = "KeyPage"
-KeyPage.Size = UDim2.fromScale(1, 1)
+KeyPage.Size = UDim2.new(1, 0, 0, 160)
 KeyPage.BackgroundTransparency = 1
 KeyPage.Parent = ContentArea
 
 local GamePage = Instance.new("Frame")
 GamePage.Name = "GamePage"
-GamePage.Size = UDim2.fromScale(1, 1)
+GamePage.Size = UDim2.new(1, 0, 0, 260)
+GamePage.Position = UDim2.fromOffset(0, -30)
 GamePage.BackgroundTransparency = 1
 GamePage.Visible = false
 GamePage.Parent = ContentArea
