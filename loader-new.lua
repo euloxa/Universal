@@ -41,9 +41,9 @@ local ICONS = {
     Lock    = "10709678129",
 }
 
-local FontExtraBold = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.ExtraBold, Enum.FontStyle.Normal)
-local FontBold      = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal)
-local FontFredoka   = Font.new("rbxasset://fonts/families/FredokaOne.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal)
+local FontExtraBold = Font.fromEnum(Enum.Font.GothamBold)
+local FontBold      = Font.fromEnum(Enum.Font.GothamMedium)
+local FontFredoka   = Font.fromEnum(Enum.Font.FredokaOne)
 
 local NeonHeaderGrad = ColorSequence.new({
     ColorSequenceKeypoint.new(0, Color3.fromRGB(22, 45, 24)),
@@ -133,20 +133,25 @@ local function Stroke(obj, color, thickness, transparency, mode)
     s.Color = color or CONFIG.Outline
     s.Thickness = thickness or 1.8
     s.Transparency = transparency or 0
-    s.ApplyStrokeMode = mode or Enum.ApplyStrokeMode.Border
-    s.LineJoinMode = Enum.LineJoinMode.Round
+    pcall(function()
+        s.ApplyStrokeMode = mode or Enum.ApplyStrokeMode.Border
+        s.LineJoinMode = Enum.LineJoinMode.Round
+    end)
     s.Parent = obj
     return s
 end
 
 local function StyleL2Text(label, useShine)
-    Stroke(label, 1.5, Color3.fromRGB(0, 0, 0), 0, Enum.ApplyStrokeMode.Contextual)
-    if useShine then
-        local grad = Instance.new("UIGradient")
-        grad.Color = TextShineGrad
-        grad.Rotation = 90
-        grad.Parent = label
-    end
+    pcall(function()
+        label.TextStrokeTransparency = 0.15
+        label.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+        if useShine then
+            local grad = Instance.new("UIGradient")
+            grad.Color = TextShineGrad
+            grad.Rotation = 90
+            grad.Parent = label
+        end
+    end)
 end
 
 local function Tween(obj, props, time, style, dir)
@@ -576,7 +581,7 @@ AutoToggleHolder.Parent = ProfileRow
 local AutoToggleStroke = Stroke(AutoToggleHolder, Color3.fromRGB(0, 0, 0), 1.6, 0)
 
 local AutoOffGrad = Instance.new("UIGradient")
-AutoOffGrad.Color = ColorSequence.new(Color3.fromRGB(18, 20, 22))
+AutoOffGrad.Color = DarkButtonGrad
 AutoOffGrad.Rotation = 90
 AutoOffGrad.Parent = AutoToggleHolder
 
@@ -1337,15 +1342,9 @@ do
     end)
 end
 
-local targetScale = UIScale.Scale
-UIScale.Scale = 0.85
-Root.BackgroundTransparency = 1
-Tween(UIScale, { Scale = targetScale }, 0.32, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
-Tween(Root, { BackgroundTransparency = 0.22 }, 0.28, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
-
-task.delay(0.5, function()
-    pcall(function() KeyInput:CaptureFocus() end)
-end)
+Root.BackgroundTransparency = 0.22
+KeyPage.Visible = true
+GamePage.Visible = false
 
 task.spawn(function()
     local saved = LoadKey()
