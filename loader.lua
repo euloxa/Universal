@@ -1,7 +1,7 @@
-local Players           = game:GetService("Players")
-local TweenService      = game:GetService("TweenService")
-local UserInputService  = game:GetService("UserInputService")
-local Camera            = workspace.CurrentCamera
+local Players            = game:GetService("Players")
+local TweenService       = game:GetService("TweenService")
+local UserInputService   = game:GetService("UserInputService")
+local Camera             = workspace.CurrentCamera
 local MarketplaceService = game:GetService("MarketplaceService")
 
 local CONFIG = {
@@ -16,17 +16,17 @@ local CONFIG = {
     AutoExecFile   = "L2Hub_LoaderAssets/autoexec.txt",
     WindowTitle    = "L2 HUB",
     WindowSubtitle = "Freemium Roblox Scripts",
-    BaseSize       = Vector2.new(400, 315),
-    ExpandedSize   = Vector2.new(400, 420),
-    Accent         = Color3.fromRGB(0, 255, 100),
-    AccentDark     = Color3.fromRGB(0, 100, 40),
+    BaseSize       = Vector2.new(410, 340),
+    ExpandedSize   = Vector2.new(410, 440),
+    Accent         = Color3.fromRGB(58, 255, 55),
+    AccentDark     = Color3.fromRGB(16, 65, 18),
     DiscordBlurple = Color3.fromRGB(88, 101, 242),
-    BG             = Color3.fromRGB(12, 12, 12),
-    Surface        = Color3.fromRGB(20, 22, 27),
-    SurfaceLight   = Color3.fromRGB(28, 30, 36),
-    Outline        = Color3.fromRGB(45, 48, 58),
+    BG             = Color3.fromRGB(8, 10, 10),
+    Surface        = Color3.fromRGB(18, 22, 20),
+    SurfaceLight   = Color3.fromRGB(28, 34, 30),
+    Outline        = Color3.fromRGB(0, 0, 0),
     Text           = Color3.fromRGB(255, 255, 255),
-    Placeholder    = Color3.fromRGB(140, 140, 155),
+    Placeholder    = Color3.fromRGB(154, 168, 158),
 }
 
 local ICONS = {
@@ -40,6 +40,53 @@ local ICONS = {
     Game    = "113512058469465",
     Lock    = "10709678129",
 }
+
+local FontExtraBold = Font.fromEnum(Enum.Font.GothamBold)
+local FontBold      = Font.fromEnum(Enum.Font.GothamMedium)
+local FontFredoka   = Font.fromEnum(Enum.Font.FredokaOne)
+
+local NeonHeaderGrad = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(22, 45, 24)),
+    ColorSequenceKeypoint.new(0.45, Color3.fromRGB(45, 175, 50)),
+    ColorSequenceKeypoint.new(0.65, Color3.fromRGB(58, 255, 55)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(16, 65, 18))
+})
+
+local NeonButtonGrad = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(160, 255, 160)),
+    ColorSequenceKeypoint.new(0.08, Color3.fromRGB(58, 255, 55)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(18, 115, 12))
+})
+
+local DarkButtonGrad = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(75, 82, 78)),
+    ColorSequenceKeypoint.new(0.08, Color3.fromRGB(42, 48, 45)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(20, 24, 22))
+})
+
+local RedButtonGrad = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 130, 130)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(225, 28, 28))
+})
+
+local RowPlateGrad = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(62, 70, 65)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(34, 40, 36)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(20, 24, 22))
+})
+
+local RowActiveGrad = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(42, 85, 45)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(24, 52, 26)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(14, 30, 16))
+})
+
+local TextShineGrad = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
+    ColorSequenceKeypoint.new(0.48, Color3.fromRGB(255, 255, 255)),
+    ColorSequenceKeypoint.new(0.52, Color3.fromRGB(215, 215, 215)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(235, 235, 235))
+})
 
 local function GetCoreGui()
     if gethui then
@@ -55,6 +102,11 @@ end
 
 local function ProtectGui(gui)
     if syn and syn.protect_gui then pcall(syn.protect_gui, gui) end
+end
+
+local OldLoader = GetCoreGui():FindFirstChild("L2HubLoader")
+if OldLoader then
+    OldLoader:Destroy()
 end
 
 local function LoadRemoteAsset(url, fileName)
@@ -76,36 +128,64 @@ local function LoadRemoteAsset(url, fileName)
     return nil
 end
 
-local function Corner(obj, radius)
-    local c = Instance.new("UICorner")
-    c.CornerRadius = (typeof(radius) == "UDim") and radius or UDim.new(0, radius or 8)
-    c.Parent = obj
-    return c
-end
-
-local function Stroke(obj, color, thickness, transparency)
+local function Stroke(obj, color, thickness, transparency, mode)
     local s = Instance.new("UIStroke")
     s.Color = color or CONFIG.Outline
-    s.Thickness = thickness or 1
-    s.Transparency = transparency or 0.35
-    s.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+    s.Thickness = thickness or 1.8
+    s.Transparency = transparency or 0
+    pcall(function()
+        s.ApplyStrokeMode = mode or Enum.ApplyStrokeMode.Border
+        s.LineJoinMode = Enum.LineJoinMode.Round
+    end)
     s.Parent = obj
     return s
 end
 
+local function StyleL2Text(label, useShine)
+    pcall(function()
+        label.TextStrokeTransparency = 0.15
+        label.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+        if useShine then
+            local grad = Instance.new("UIGradient")
+            grad.Color = TextShineGrad
+            grad.Rotation = 90
+            grad.Parent = label
+        end
+    end)
+end
+
 local function Tween(obj, props, time, style, dir)
-    local info = TweenInfo.new(time or 0.2, style or Enum.EasingStyle.Quad, dir or Enum.EasingDirection.Out)
+    local info = TweenInfo.new(time or 0.18, style or Enum.EasingStyle.Quint, dir or Enum.EasingDirection.Out)
     local t = TweenService:Create(obj, info, props)
     t:Play()
     return t
 end
 
-local function Gradient(parent, colorA, colorB, rotation)
-    local g = Instance.new("UIGradient")
-    g.Color = ColorSequence.new(colorA, colorB)
-    g.Rotation = rotation or 90
-    g.Parent = parent
-    return g
+local function AddScaleFeedback(btn, hoverScale, pressScale)
+    local scale = Instance.new("UIScale")
+    scale.Scale = 1
+    scale.Parent = btn
+    local hovering = false
+
+    btn.MouseEnter:Connect(function()
+        hovering = true
+        Tween(scale, {Scale = hoverScale or 1.035}, 0.1, Enum.EasingStyle.Quad)
+    end)
+
+    btn.MouseLeave:Connect(function()
+        hovering = false
+        Tween(scale, {Scale = 1}, 0.1, Enum.EasingStyle.Quad)
+    end)
+
+    btn.MouseButton1Down:Connect(function()
+        Tween(scale, {Scale = pressScale or 0.95}, 0.055, Enum.EasingStyle.Quad)
+    end)
+
+    btn.MouseButton1Up:Connect(function()
+        Tween(scale, {Scale = hovering and (hoverScale or 1.035) or 1}, 0.08, Enum.EasingStyle.Quad)
+    end)
+
+    return scale
 end
 
 local function CopyURL(url)
@@ -238,28 +318,148 @@ local Root = Instance.new("Frame")
 Root.Name = "Root"
 Root.Size = UDim2.fromScale(1, 1)
 Root.BackgroundColor3 = CONFIG.BG
-Root.BackgroundTransparency = 0.05
+Root.BackgroundTransparency = 0.22
 Root.BorderSizePixel = 0
 Root.ClipsDescendants = true
 Root.Active = true
 Root.Parent = UIScaleHolder
-Corner(Root, 14)
-Stroke(Root, CONFIG.Outline, 1, 0.4)
+Stroke(Root, Color3.fromRGB(0, 0, 0), 2.4, 0)
+
+local GridTexture = Instance.new("ImageLabel")
+GridTexture.Name = "GridTexture"
+GridTexture.Size = UDim2.fromScale(1, 1)
+GridTexture.BackgroundTransparency = 1
+GridTexture.Image = "rbxassetid://6372755229"
+GridTexture.ImageColor3 = CONFIG.Accent
+GridTexture.ImageTransparency = 0.93
+GridTexture.ScaleType = Enum.ScaleType.Tile
+GridTexture.TileSize = UDim2.fromOffset(24, 24)
+GridTexture.ZIndex = 1
+GridTexture.Parent = Root
+
+local TopBar = Instance.new("Frame")
+TopBar.Name = "TopBar"
+TopBar.Size = UDim2.new(1, 0, 0, 38)
+TopBar.BackgroundColor3 = Color3.fromRGB(8, 38, 10)
+TopBar.BorderSizePixel = 0
+TopBar.ZIndex = 10
+TopBar.Parent = Root
+Stroke(TopBar, Color3.fromRGB(0, 0, 0), 1.8, 0)
+
+local TopColor = Instance.new("Frame")
+TopColor.AnchorPoint = Vector2.new(0.5, 0)
+TopColor.Position = UDim2.fromScale(0.5, 0)
+TopColor.Size = UDim2.fromScale(1, 0.88)
+TopColor.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+TopColor.BorderSizePixel = 0
+TopColor.ZIndex = 11
+TopColor.Parent = TopBar
+
+local TopGrad = Instance.new("UIGradient")
+TopGrad.Color = NeonHeaderGrad
+TopGrad.Rotation = 25
+TopGrad.Parent = TopColor
+
+local TopTrans = Instance.new("Frame")
+TopTrans.AnchorPoint = Vector2.new(0.5, 0.5)
+TopTrans.Position = UDim2.fromScale(0.5, 0.5)
+TopTrans.Size = UDim2.fromScale(0.988, 0.84)
+TopTrans.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+TopTrans.BackgroundTransparency = 0.88
+TopTrans.BorderSizePixel = 0
+TopTrans.ZIndex = 12
+TopTrans.Parent = TopColor
+
+local TopTitle = Instance.new("TextLabel")
+TopTitle.AnchorPoint = Vector2.new(0, 0.5)
+TopTitle.Position = UDim2.new(0, 12, 0.5, 0)
+TopTitle.Size = UDim2.new(0.65, 0, 0, 22)
+TopTitle.BackgroundTransparency = 1
+TopTitle.FontFace = FontExtraBold
+TopTitle.Text = "L2 HUB  //  LOADER"
+TopTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+TopTitle.TextSize = 15
+TopTitle.TextXAlignment = Enum.TextXAlignment.Left
+TopTitle.ZIndex = 13
+TopTitle.Parent = TopColor
+StyleL2Text(TopTitle, true)
+
+local CloseBtn = Instance.new("TextButton")
+CloseBtn.Name = "CloseBtn"
+CloseBtn.AnchorPoint = Vector2.new(1, 0.5)
+CloseBtn.Position = UDim2.new(1, -6, 0.5, 0)
+CloseBtn.Size = UDim2.fromOffset(26, 26)
+CloseBtn.BackgroundColor3 = Color3.fromRGB(126, 0, 0)
+CloseBtn.BorderSizePixel = 0
+CloseBtn.Text = ""
+CloseBtn.AutoButtonColor = false
+CloseBtn.ZIndex = 20
+CloseBtn.Parent = TopBar
+Stroke(CloseBtn, Color3.fromRGB(50, 0, 0), 1.6, 0)
+
+local CloseColor = Instance.new("Frame")
+CloseColor.AnchorPoint = Vector2.new(0.5, 0)
+CloseColor.Position = UDim2.fromScale(0.5, 0)
+CloseColor.Size = UDim2.fromScale(1, 0.9)
+CloseColor.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+CloseColor.BorderSizePixel = 0
+CloseColor.ZIndex = 21
+CloseColor.Parent = CloseBtn
+
+local CloseGrad = Instance.new("UIGradient")
+CloseGrad.Color = RedButtonGrad
+CloseGrad.Rotation = 90
+CloseGrad.Parent = CloseColor
+
+local CloseInner = Instance.new("Frame")
+CloseInner.AnchorPoint = Vector2.new(0.5, 0.5)
+CloseInner.Position = UDim2.fromScale(0.5, 0.5)
+CloseInner.Size = UDim2.fromScale(0.92, 0.84)
+CloseInner.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+CloseInner.BackgroundTransparency = 0.88
+CloseInner.BorderSizePixel = 0
+CloseInner.ZIndex = 22
+CloseInner.Parent = CloseColor
+
+local CloseLabel = Instance.new("TextLabel")
+CloseLabel.AnchorPoint = Vector2.new(0.5, 0.5)
+CloseLabel.Position = UDim2.fromScale(0.5, 0.5)
+CloseLabel.Size = UDim2.fromScale(1, 1)
+CloseLabel.BackgroundTransparency = 1
+CloseLabel.FontFace = FontExtraBold
+CloseLabel.Text = "X"
+CloseLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+CloseLabel.TextSize = 14
+CloseLabel.ZIndex = 23
+CloseLabel.Parent = CloseColor
+StyleL2Text(CloseLabel, true)
+AddScaleFeedback(CloseBtn, 1.06, 0.94)
 
 local BannerHolder = Instance.new("Frame")
 BannerHolder.Name = "BannerHolder"
-BannerHolder.Size = UDim2.new(1, 0, 0, 110)
+BannerHolder.Position = UDim2.fromOffset(0, 38)
+BannerHolder.Size = UDim2.new(1, 0, 0, 92)
 BannerHolder.BackgroundColor3 = CONFIG.Surface
 BannerHolder.BorderSizePixel = 0
 BannerHolder.ClipsDescendants = true
+BannerHolder.ZIndex = 2
 BannerHolder.Parent = Root
+Stroke(BannerHolder, Color3.fromRGB(0, 0, 0), 1.6, 0)
 
 local BannerFallback = Instance.new("Frame")
 BannerFallback.Size = UDim2.fromScale(1, 1)
-BannerFallback.BackgroundColor3 = CONFIG.AccentDark
+BannerFallback.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 BannerFallback.BorderSizePixel = 0
 BannerFallback.Parent = BannerHolder
-Gradient(BannerFallback, Color3.fromRGB(0, 200, 80), Color3.fromRGB(0, 40, 20), 45)
+
+local FallbackGrad = Instance.new("UIGradient")
+FallbackGrad.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(16, 48, 20)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(10, 26, 12)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(8, 12, 10))
+})
+FallbackGrad.Rotation = 35
+FallbackGrad.Parent = BannerFallback
 
 local BannerImage = Instance.new("ImageLabel")
 BannerImage.Name = "Banner"
@@ -268,184 +468,247 @@ BannerImage.BackgroundTransparency = 1
 BannerImage.ScaleType = Enum.ScaleType.Crop
 BannerImage.Image = ""
 BannerImage.ImageTransparency = 1
+BannerImage.ZIndex = 3
 BannerImage.Parent = BannerHolder
 
 task.spawn(function()
     local asset = LoadRemoteAsset(CONFIG.BannerURL, "banner.png")
     if asset then
         BannerImage.Image = asset
-        Tween(BannerImage, { ImageTransparency = 0 }, 0.4)
+        Tween(BannerImage, { ImageTransparency = 0.15 }, 0.4)
     end
 end)
 
 local BannerOverlay = Instance.new("Frame")
 BannerOverlay.Size = UDim2.fromScale(1, 1)
 BannerOverlay.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-BannerOverlay.BackgroundTransparency = 0.55
+BannerOverlay.BackgroundTransparency = 0.45
 BannerOverlay.BorderSizePixel = 0
+BannerOverlay.ZIndex = 4
 BannerOverlay.Parent = BannerHolder
-Gradient(BannerOverlay, Color3.fromRGB(0, 0, 0), Color3.fromRGB(0, 0, 0), 90)
-
-local CloseBtn = Instance.new("ImageButton")
-CloseBtn.Name = "CloseBtn"
-CloseBtn.AnchorPoint = Vector2.new(1, 0)
-CloseBtn.Position = UDim2.new(1, -10, 0, 10)
-CloseBtn.Size = UDim2.fromOffset(28, 28)
-CloseBtn.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-CloseBtn.BackgroundTransparency = 0.45
-CloseBtn.BorderSizePixel = 0
-CloseBtn.Image = "rbxassetid://" .. ICONS.Close
-CloseBtn.ImageColor3 = CONFIG.Text
-CloseBtn.ImageTransparency = 0.1
-CloseBtn.ScaleType = Enum.ScaleType.Fit
-CloseBtn.AutoButtonColor = false
-CloseBtn.ZIndex = 20
-CloseBtn.Parent = BannerHolder
-Corner(CloseBtn, UDim.new(1, 0))
-Stroke(CloseBtn, CONFIG.Outline, 1, 0.5)
-
-local closeIconScale = Instance.new("UIScale")
-closeIconScale.Scale = 0.55
-closeIconScale.Parent = CloseBtn
-
-CloseBtn.MouseEnter:Connect(function()
-    Tween(CloseBtn, { BackgroundTransparency = 0.1, BackgroundColor3 = Color3.fromRGB(255, 80, 80) }, 0.15)
-    Tween(CloseBtn, { ImageTransparency = 0 }, 0.15)
-end)
-CloseBtn.MouseLeave:Connect(function()
-    Tween(CloseBtn, { BackgroundTransparency = 0.45, BackgroundColor3 = Color3.fromRGB(0, 0, 0) }, 0.15)
-    Tween(CloseBtn, { ImageTransparency = 0.1 }, 0.15)
-end)
-CloseBtn.MouseButton1Click:Connect(function()
-    FireVerified(false)
-    Tween(Root, { BackgroundTransparency = 1 }, 0.2)
-    task.wait(0.25)
-    ScreenGui:Destroy()
-end)
 
 local ProfileRow = Instance.new("Frame")
 ProfileRow.Name = "ProfileRow"
-ProfileRow.Size = UDim2.new(1, -28, 0, 68)
-ProfileRow.Position = UDim2.fromOffset(14, 110 - 38)
-ProfileRow.BackgroundTransparency = 1
-ProfileRow.ZIndex = 2
+ProfileRow.Size = UDim2.new(1, -24, 0, 64)
+ProfileRow.Position = UDim2.fromOffset(12, 98)
+ProfileRow.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+ProfileRow.BackgroundTransparency = 0.08
+ProfileRow.BorderSizePixel = 0
+ProfileRow.ZIndex = 6
 ProfileRow.Parent = Root
+Stroke(ProfileRow, Color3.fromRGB(0, 0, 0), 1.8, 0)
+
+local ProfileGrad = Instance.new("UIGradient")
+ProfileGrad.Color = RowPlateGrad
+ProfileGrad.Rotation = 90
+ProfileGrad.Parent = ProfileRow
+
+local ProfileBevel = Instance.new("Frame")
+ProfileBevel.AnchorPoint = Vector2.new(0.5, 0.5)
+ProfileBevel.Position = UDim2.fromScale(0.5, 0.5)
+ProfileBevel.Size = UDim2.new(1, -4, 1, -4)
+ProfileBevel.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+ProfileBevel.BackgroundTransparency = 0.72
+ProfileBevel.BorderSizePixel = 0
+ProfileBevel.ZIndex = 6
+ProfileBevel.Parent = ProfileRow
 
 local AvatarHolder = Instance.new("Frame")
-AvatarHolder.Size = UDim2.fromOffset(76, 76)
-AvatarHolder.BackgroundColor3 = CONFIG.BG
+AvatarHolder.AnchorPoint = Vector2.new(0, 0.5)
+AvatarHolder.Position = UDim2.new(0, 8, 0.5, 0)
+AvatarHolder.Size = UDim2.fromOffset(48, 48)
+AvatarHolder.BackgroundColor3 = Color3.fromRGB(10, 14, 12)
 AvatarHolder.BorderSizePixel = 0
-AvatarHolder.ZIndex = 3
+AvatarHolder.ZIndex = 7
 AvatarHolder.Parent = ProfileRow
-Corner(AvatarHolder, UDim.new(1, 0))
-Stroke(AvatarHolder, CONFIG.Accent, 2, 0)
+Stroke(AvatarHolder, CONFIG.Accent, 1.6, 0)
 
 local AvatarImage = Instance.new("ImageLabel")
 AvatarImage.AnchorPoint = Vector2.new(0.5, 0.5)
 AvatarImage.Position = UDim2.fromScale(0.5, 0.5)
-AvatarImage.Size = UDim2.fromScale(0.88, 0.88)
+AvatarImage.Size = UDim2.fromScale(0.9, 0.9)
 AvatarImage.BackgroundTransparency = 1
 AvatarImage.Image = CONFIG.LogoAsset
 AvatarImage.ScaleType = Enum.ScaleType.Fit
-AvatarImage.ZIndex = 4
+AvatarImage.ZIndex = 8
 AvatarImage.Parent = AvatarHolder
-Corner(AvatarImage, UDim.new(1, 0))
 
 local StatusDot = Instance.new("Frame")
 StatusDot.AnchorPoint = Vector2.new(1, 1)
-StatusDot.Position = UDim2.new(1, -4, 1, -4)
-StatusDot.Size = UDim2.fromOffset(14, 14)
+StatusDot.Position = UDim2.new(1, -2, 1, -2)
+StatusDot.Size = UDim2.fromOffset(10, 10)
 StatusDot.BackgroundColor3 = CONFIG.Accent
 StatusDot.BorderSizePixel = 0
-StatusDot.ZIndex = 5
+StatusDot.ZIndex = 9
 StatusDot.Parent = AvatarHolder
-Corner(StatusDot, UDim.new(1, 0))
-Stroke(StatusDot, CONFIG.BG, 3, 0)
+Stroke(StatusDot, Color3.fromRGB(0, 0, 0), 1.5, 0)
 
 local TitleLabel = Instance.new("TextLabel")
-TitleLabel.Position = UDim2.fromOffset(90, 10)
-TitleLabel.Size = UDim2.new(1, -160, 0, 26)
+TitleLabel.Position = UDim2.fromOffset(66, 10)
+TitleLabel.Size = UDim2.new(1, -170, 0, 22)
 TitleLabel.BackgroundTransparency = 1
-TitleLabel.Font = Enum.Font.GothamBold
+TitleLabel.FontFace = FontExtraBold
 TitleLabel.Text = CONFIG.WindowTitle
 TitleLabel.TextColor3 = CONFIG.Text
-TitleLabel.TextSize = 22
+TitleLabel.TextSize = 18
 TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
-TitleLabel.ZIndex = 3
+TitleLabel.ZIndex = 8
 TitleLabel.Parent = ProfileRow
+StyleL2Text(TitleLabel, true)
 
 local SubLabel = Instance.new("TextLabel")
-SubLabel.Position = UDim2.fromOffset(90, 38)
-SubLabel.Size = UDim2.new(1, -160, 0, 18)
+SubLabel.Position = UDim2.fromOffset(66, 33)
+SubLabel.Size = UDim2.new(1, -170, 0, 16)
 SubLabel.BackgroundTransparency = 1
-SubLabel.Font = Enum.Font.GothamMedium
+SubLabel.FontFace = FontBold
 SubLabel.Text = CONFIG.WindowSubtitle
-SubLabel.TextColor3 = CONFIG.Placeholder
-SubLabel.TextSize = 13
+SubLabel.TextColor3 = Color3.fromRGB(130, 240, 130)
+SubLabel.TextSize = 11
 SubLabel.TextXAlignment = Enum.TextXAlignment.Left
-SubLabel.ZIndex = 3
+SubLabel.ZIndex = 8
 SubLabel.Parent = ProfileRow
+StyleL2Text(SubLabel, false)
 
 local AutoToggleHolder = Instance.new("Frame")
 AutoToggleHolder.Name = "AutoToggleHolder"
 AutoToggleHolder.AnchorPoint = Vector2.new(1, 0)
-AutoToggleHolder.Position = UDim2.new(1, 0, 0, 20)
-AutoToggleHolder.Size = UDim2.fromOffset(60, 28)
-AutoToggleHolder.BackgroundColor3 = CONFIG.Surface
+AutoToggleHolder.Position = UDim2.new(1, -10, 0, 10)
+AutoToggleHolder.Size = UDim2.fromOffset(64, 26)
+AutoToggleHolder.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 AutoToggleHolder.BorderSizePixel = 0
-AutoToggleHolder.ZIndex = 5
+AutoToggleHolder.ZIndex = 8
 AutoToggleHolder.Parent = ProfileRow
-Corner(AutoToggleHolder, UDim.new(1, 0))
-local AutoToggleStroke = Stroke(AutoToggleHolder, CONFIG.Outline, 1, 0.4)
+local AutoToggleStroke = Stroke(AutoToggleHolder, Color3.fromRGB(0, 0, 0), 1.6, 0)
+
+local AutoOffGrad = Instance.new("UIGradient")
+AutoOffGrad.Color = DarkButtonGrad
+AutoOffGrad.Rotation = 90
+AutoOffGrad.Parent = AutoToggleHolder
+
+local AutoOnGrad = Instance.new("UIGradient")
+AutoOnGrad.Color = NeonButtonGrad
+AutoOnGrad.Rotation = 90
+AutoOnGrad.Enabled = false
+AutoOnGrad.Parent = AutoToggleHolder
 
 local AutoToggleBtn = Instance.new("TextButton")
 AutoToggleBtn.Size = UDim2.fromScale(1, 1)
 AutoToggleBtn.BackgroundTransparency = 1
 AutoToggleBtn.Text = ""
 AutoToggleBtn.AutoButtonColor = false
-AutoToggleBtn.ZIndex = 6
+AutoToggleBtn.ZIndex = 11
 AutoToggleBtn.Parent = AutoToggleHolder
 
 local AutoKnob = Instance.new("Frame")
-AutoKnob.AnchorPoint = Vector2.new(0, 0.5)
-AutoKnob.Position = UDim2.new(0, 3, 0.5, 0)
-AutoKnob.Size = UDim2.fromOffset(22, 22)
-AutoKnob.BackgroundColor3 = CONFIG.Placeholder
+AutoKnob.AnchorPoint = Vector2.new(0.5, 0.5)
+AutoKnob.Position = UDim2.fromScale(0.26, 0.5)
+AutoKnob.Size = UDim2.fromOffset(22, 18)
+AutoKnob.BackgroundColor3 = Color3.fromRGB(90, 95, 92)
 AutoKnob.BorderSizePixel = 0
-AutoKnob.ZIndex = 7
+AutoKnob.ZIndex = 9
 AutoKnob.Parent = AutoToggleHolder
-Corner(AutoKnob, UDim.new(1, 0))
+Stroke(AutoKnob, Color3.fromRGB(0, 0, 0), 1.4, 0)
+
+local AutoKnobTop = Instance.new("Frame")
+AutoKnobTop.AnchorPoint = Vector2.new(0.5, 0)
+AutoKnobTop.Position = UDim2.fromScale(0.5, 0)
+AutoKnobTop.Size = UDim2.fromScale(1, 0.88)
+AutoKnobTop.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+AutoKnobTop.BorderSizePixel = 0
+AutoKnobTop.ZIndex = 10
+AutoKnobTop.Parent = AutoKnob
 
 local AutoLabel = Instance.new("TextLabel")
 AutoLabel.AnchorPoint = Vector2.new(0.5, 0)
-AutoLabel.Position = UDim2.new(0.5, 0, 1, 2)
-AutoLabel.Size = UDim2.new(1, 0, 0, 12)
+AutoLabel.Position = UDim2.new(0.5, 0, 1, 4)
+AutoLabel.Size = UDim2.new(1, 16, 0, 12)
 AutoLabel.BackgroundTransparency = 1
-AutoLabel.Font = Enum.Font.GothamBold
+AutoLabel.FontFace = FontExtraBold
 AutoLabel.Text = "AUTO EXEC"
 AutoLabel.TextColor3 = CONFIG.Placeholder
 AutoLabel.TextSize = 9
-AutoLabel.ZIndex = 7
+AutoLabel.ZIndex = 9
 AutoLabel.Parent = AutoToggleHolder
+StyleL2Text(AutoLabel, false)
 
 local autoExecEnabled = LoadAutoExec()
 
 local function UpdateAutoToggle(animate)
-    local dur = animate and 0.2 or 0
-    if autoExecEnabled then
-        Tween(AutoToggleHolder, { BackgroundColor3 = CONFIG.AccentDark }, dur)
-        Tween(AutoKnob, { Position = UDim2.new(1, -25, 0.5, 0), BackgroundColor3 = CONFIG.Accent }, dur)
-        Tween(AutoToggleStroke, { Color = CONFIG.Accent, Transparency = 0.1 }, dur)
-        AutoLabel.TextColor3 = CONFIG.Accent
+    local dur = animate and 0.16 or 0
+    AutoOnGrad.Enabled = autoExecEnabled
+    AutoOffGrad.Enabled = not autoExecEnabled
+
+    local targetPos = autoExecEnabled and UDim2.fromScale(0.74, 0.5) or UDim2.fromScale(0.26, 0.5)
+    if animate then
+        Tween(AutoKnob, { Position = targetPos }, dur)
     else
-        Tween(AutoToggleHolder, { BackgroundColor3 = CONFIG.Surface }, dur)
-        Tween(AutoKnob, { Position = UDim2.new(0, 3, 0.5, 0), BackgroundColor3 = CONFIG.Placeholder }, dur)
-        Tween(AutoToggleStroke, { Color = CONFIG.Outline, Transparency = 0.4 }, dur)
-        AutoLabel.TextColor3 = CONFIG.Placeholder
+        AutoKnob.Position = targetPos
     end
+
+    AutoToggleStroke.Color = autoExecEnabled and CONFIG.Accent or Color3.fromRGB(0, 0, 0)
+    AutoLabel.TextColor3 = autoExecEnabled and CONFIG.Accent or CONFIG.Placeholder
 end
 
 UpdateAutoToggle(false)
+
+local ToastHolder = Instance.new("Frame")
+ToastHolder.AnchorPoint = Vector2.new(0.5, 0)
+ToastHolder.Position = UDim2.new(0.5, 0, 0, 44)
+ToastHolder.Size = UDim2.new(1, -24, 0, 34)
+ToastHolder.BackgroundColor3 = Color3.fromRGB(10, 14, 12)
+ToastHolder.BackgroundTransparency = 1
+ToastHolder.BorderSizePixel = 0
+ToastHolder.ZIndex = 60
+ToastHolder.Parent = Root
+local ToastStroke = Stroke(ToastHolder, CONFIG.Accent, 1.6, 1)
+
+local ToastAccentLeft = Instance.new("Frame")
+ToastAccentLeft.Size = UDim2.new(0, 4, 1, 0)
+ToastAccentLeft.BackgroundColor3 = CONFIG.Accent
+ToastAccentLeft.BackgroundTransparency = 1
+ToastAccentLeft.BorderSizePixel = 0
+ToastAccentLeft.ZIndex = 61
+ToastAccentLeft.Parent = ToastHolder
+
+local ToastLabel = Instance.new("TextLabel")
+ToastLabel.Size = UDim2.new(1, -20, 1, 0)
+ToastLabel.Position = UDim2.fromOffset(12, 0)
+ToastLabel.BackgroundTransparency = 1
+ToastLabel.FontFace = FontExtraBold
+ToastLabel.Text = ""
+ToastLabel.TextColor3 = CONFIG.Text
+ToastLabel.TextTransparency = 1
+ToastLabel.TextSize = 12
+ToastLabel.TextXAlignment = Enum.TextXAlignment.Center
+ToastLabel.TextWrapped = true
+ToastLabel.ZIndex = 62
+ToastLabel.Parent = ToastHolder
+
+local toastBusy = false
+local function Toast(text, ok)
+    if toastBusy then return end
+    toastBusy = true
+
+    local statusColor = (ok == false) and Color3.fromRGB(255, 85, 85) or CONFIG.Accent
+    ToastLabel.Text = text
+    ToastLabel.TextColor3 = (ok == false) and Color3.fromRGB(255, 130, 130) or CONFIG.Text
+    ToastStroke.Color = statusColor
+    ToastAccentLeft.BackgroundColor3 = statusColor
+
+    Tween(ToastHolder, { BackgroundTransparency = 0.08 }, 0.18)
+    Tween(ToastStroke, { Transparency = 0 }, 0.18)
+    Tween(ToastAccentLeft, { BackgroundTransparency = 0 }, 0.18)
+    Tween(ToastLabel, { TextTransparency = 0 }, 0.18)
+
+    task.delay(2.3, function()
+        Tween(ToastHolder, { BackgroundTransparency = 1 }, 0.22)
+        Tween(ToastStroke, { Transparency = 1 }, 0.22)
+        Tween(ToastAccentLeft, { BackgroundTransparency = 1 }, 0.22)
+        Tween(ToastLabel, { TextTransparency = 1 }, 0.22)
+        task.wait(0.25)
+        toastBusy = false
+    end)
+end
 
 AutoToggleBtn.MouseButton1Click:Connect(function()
     autoExecEnabled = not autoExecEnabled
@@ -454,53 +717,64 @@ AutoToggleBtn.MouseButton1Click:Connect(function()
     Toast(autoExecEnabled and "Auto-Execute ON." or "Auto-Execute OFF.", true)
 end)
 
+CloseBtn.MouseButton1Click:Connect(function()
+    FireVerified(false)
+    Tween(UIScale, { Scale = 0 }, 0.22, Enum.EasingStyle.Back, Enum.EasingDirection.In)
+    task.wait(0.24)
+    ScreenGui:Destroy()
+end)
+
 local ContentArea = Instance.new("Frame")
-ContentArea.Position = UDim2.fromOffset(14, 110 + 48)
-ContentArea.Size = UDim2.new(1, -28, 1, -(110 + 48) - 14)
+ContentArea.Position = UDim2.fromOffset(12, 168)
+ContentArea.Size = UDim2.new(1, -24, 0, 160)
 ContentArea.BackgroundTransparency = 1
-ContentArea.ClipsDescendants = true
+ContentArea.ClipsDescendants = false
+ContentArea.ZIndex = 5
 ContentArea.Parent = Root
 
 local KeyPage = Instance.new("Frame")
 KeyPage.Name = "KeyPage"
-KeyPage.Size = UDim2.fromScale(1, 1)
+KeyPage.Size = UDim2.new(1, 0, 0, 160)
 KeyPage.BackgroundTransparency = 1
 KeyPage.Parent = ContentArea
 
 local GamePage = Instance.new("Frame")
 GamePage.Name = "GamePage"
-GamePage.Size = UDim2.fromScale(1, 1)
+GamePage.Size = UDim2.new(1, 0, 0, 260)
+GamePage.Position = UDim2.fromOffset(0, -30)
 GamePage.BackgroundTransparency = 1
 GamePage.Visible = false
 GamePage.Parent = ContentArea
 
-local Divider = Instance.new("Frame")
-Divider.Size = UDim2.new(1, 0, 0, 1)
-Divider.BackgroundColor3 = CONFIG.Outline
-Divider.BackgroundTransparency = 0.35
-Divider.BorderSizePixel = 0
-Divider.Parent = KeyPage
-
 local SectionLabel = Instance.new("TextLabel")
-SectionLabel.Position = UDim2.fromOffset(0, 12)
-SectionLabel.Size = UDim2.new(1, 0, 0, 16)
+SectionLabel.Position = UDim2.fromOffset(2, 4)
+SectionLabel.Size = UDim2.new(1, -4, 0, 16)
 SectionLabel.BackgroundTransparency = 1
-SectionLabel.Font = Enum.Font.GothamBold
-SectionLabel.Text = "AUTHENTICATION"
-SectionLabel.TextColor3 = CONFIG.Placeholder
+SectionLabel.FontFace = FontExtraBold
+SectionLabel.Text = "AUTHENTICATION  //  ENTER ACCESS KEY"
+SectionLabel.TextColor3 = CONFIG.Accent
 SectionLabel.TextSize = 11
 SectionLabel.TextXAlignment = Enum.TextXAlignment.Left
 SectionLabel.Parent = KeyPage
+StyleL2Text(SectionLabel, false)
 
 local InputHolder = Instance.new("Frame")
-InputHolder.Position = UDim2.fromOffset(0, 36)
-InputHolder.Size = UDim2.new(1, 0, 0, 38)
-InputHolder.BackgroundColor3 = CONFIG.Surface
-InputHolder.BackgroundTransparency = 0.15
+InputHolder.Position = UDim2.fromOffset(2, 26)
+InputHolder.Size = UDim2.new(1, -4, 0, 40)
+InputHolder.BackgroundColor3 = Color3.fromRGB(10, 12, 11)
+InputHolder.BackgroundTransparency = 0.25
 InputHolder.BorderSizePixel = 0
 InputHolder.Parent = KeyPage
-Corner(InputHolder, 8)
-local InputStroke = Stroke(InputHolder, CONFIG.Outline, 1, 0.35)
+local InputStroke = Stroke(InputHolder, Color3.fromRGB(0, 0, 0), 1.8, 0)
+
+local InputUnderline = Instance.new("Frame")
+InputUnderline.AnchorPoint = Vector2.new(0.5, 1)
+InputUnderline.Position = UDim2.fromScale(0.5, 1)
+InputUnderline.Size = UDim2.new(0, 0, 0, 2)
+InputUnderline.BackgroundColor3 = CONFIG.Accent
+InputUnderline.BorderSizePixel = 0
+InputUnderline.ZIndex = 8
+InputUnderline.Parent = InputHolder
 
 local InputIcon = Instance.new("ImageLabel")
 InputIcon.AnchorPoint = Vector2.new(0, 0.5)
@@ -510,141 +784,225 @@ InputIcon.BackgroundTransparency = 1
 InputIcon.Image = "rbxassetid://" .. ICONS.Key
 InputIcon.ImageColor3 = CONFIG.Accent
 InputIcon.ScaleType = Enum.ScaleType.Fit
+InputIcon.ZIndex = 7
 InputIcon.Parent = InputHolder
 
 local KeyInput = Instance.new("TextBox")
 KeyInput.AnchorPoint = Vector2.new(0, 0.5)
-KeyInput.Position = UDim2.new(0, 40, 0.5, 0)
-KeyInput.Size = UDim2.new(1, -52, 1, 0)
+KeyInput.Position = UDim2.new(0, 38, 0.5, 0)
+KeyInput.Size = UDim2.new(1, -48, 1, 0)
 KeyInput.BackgroundTransparency = 1
-KeyInput.Font = Enum.Font.GothamMedium
-KeyInput.PlaceholderText = "Paste your key here..."
+KeyInput.FontFace = FontBold
+KeyInput.PlaceholderText = "Paste your L2 Key here..."
 KeyInput.PlaceholderColor3 = CONFIG.Placeholder
 KeyInput.Text = ""
 KeyInput.TextColor3 = CONFIG.Text
 KeyInput.TextSize = 13
 KeyInput.TextXAlignment = Enum.TextXAlignment.Left
 KeyInput.ClearTextOnFocus = false
+KeyInput.ZIndex = 7
 KeyInput.Parent = InputHolder
+StyleL2Text(KeyInput, false)
 
-InputHolder.MouseEnter:Connect(function()
-    Tween(InputStroke, { Transparency = 0.1 }, 0.15)
+KeyInput.Focused:Connect(function()
+    Tween(InputHolder, { BackgroundTransparency = 0.1 }, 0.16)
+    Tween(InputUnderline, { Size = UDim2.new(1, 0, 0, 2) }, 0.22, Enum.EasingStyle.Quint)
+    Tween(InputStroke, { Color = CONFIG.Accent }, 0.16)
 end)
-InputHolder.MouseLeave:Connect(function()
-    Tween(InputStroke, { Transparency = 0.35 }, 0.15)
+
+KeyInput.FocusLost:Connect(function()
+    Tween(InputHolder, { BackgroundTransparency = 0.25 }, 0.16)
+    Tween(InputUnderline, { Size = UDim2.new(0, 0, 0, 2) }, 0.22, Enum.EasingStyle.Quint)
+    Tween(InputStroke, { Color = Color3.fromRGB(0, 0, 0) }, 0.16)
 end)
 
 local BtnRow = Instance.new("Frame")
-BtnRow.Position = UDim2.fromOffset(0, 86)
-BtnRow.Size = UDim2.new(1, 0, 0, 42)
+BtnRow.Position = UDim2.fromOffset(2, 78)
+BtnRow.Size = UDim2.new(1, -4, 0, 42)
 BtnRow.BackgroundTransparency = 1
 BtnRow.Parent = KeyPage
 
 local VerifyBtn = Instance.new("TextButton")
-VerifyBtn.Size = UDim2.new(0.62, -3, 0, 42)
-VerifyBtn.Position = UDim2.fromOffset(0, 0)
-VerifyBtn.BackgroundColor3 = CONFIG.Accent
-VerifyBtn.BackgroundTransparency = 0
+VerifyBtn.Size = UDim2.new(0.60, -4, 0, 40)
+VerifyBtn.Position = UDim2.fromOffset(0, 1)
+VerifyBtn.BackgroundTransparency = 1
 VerifyBtn.BorderSizePixel = 0
 VerifyBtn.Text = ""
 VerifyBtn.AutoButtonColor = false
+VerifyBtn.ZIndex = 7
 VerifyBtn.Parent = BtnRow
-Corner(VerifyBtn, 8)
+AddScaleFeedback(VerifyBtn, 1.03, 0.96)
+
+local VerifyBase = Instance.new("Frame")
+VerifyBase.AnchorPoint = Vector2.new(0.5, 0.5)
+VerifyBase.Position = UDim2.fromScale(0.5, 0.5)
+VerifyBase.Size = UDim2.fromScale(1, 0.94)
+VerifyBase.BackgroundColor3 = Color3.fromRGB(10, 75, 12)
+VerifyBase.BorderSizePixel = 0
+VerifyBase.ZIndex = 7
+VerifyBase.Parent = VerifyBtn
+Stroke(VerifyBase, Color3.fromRGB(0, 0, 0), 1.8, 0)
+
+local VerifyColor = Instance.new("Frame")
+VerifyColor.AnchorPoint = Vector2.new(0.5, 0)
+VerifyColor.Position = UDim2.fromScale(0.5, 0)
+VerifyColor.Size = UDim2.fromScale(1, 0.9)
+VerifyColor.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+VerifyColor.BorderSizePixel = 0
+VerifyColor.ZIndex = 8
+VerifyColor.Parent = VerifyBase
+
+local VerifyGrad = Instance.new("UIGradient")
+VerifyGrad.Color = NeonButtonGrad
+VerifyGrad.Rotation = 90
+VerifyGrad.Parent = VerifyColor
+
+local VerifyInner = Instance.new("Frame")
+VerifyInner.AnchorPoint = Vector2.new(0.5, 0.5)
+VerifyInner.Position = UDim2.fromScale(0.5, 0.5)
+VerifyInner.Size = UDim2.fromScale(0.96, 0.84)
+VerifyInner.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+VerifyInner.BackgroundTransparency = 0.86
+VerifyInner.BorderSizePixel = 0
+VerifyInner.ZIndex = 9
+VerifyInner.Parent = VerifyColor
 
 local VerifyIcon = Instance.new("ImageLabel")
 VerifyIcon.AnchorPoint = Vector2.new(0, 0.5)
-VerifyIcon.Position = UDim2.new(0, 12, 0.5, 0)
+VerifyIcon.Position = UDim2.new(0, 14, 0.5, 0)
 VerifyIcon.Size = UDim2.fromOffset(16, 16)
 VerifyIcon.BackgroundTransparency = 1
 VerifyIcon.Image = "rbxassetid://" .. ICONS.Verify
-VerifyIcon.ImageColor3 = Color3.fromRGB(0, 0, 0)
+VerifyIcon.ImageColor3 = Color3.fromRGB(255, 255, 255)
 VerifyIcon.ScaleType = Enum.ScaleType.Fit
-VerifyIcon.Parent = VerifyBtn
+VerifyIcon.ZIndex = 10
+VerifyIcon.Parent = VerifyColor
 
 local VerifyLabel = Instance.new("TextLabel")
 VerifyLabel.AnchorPoint = Vector2.new(0.5, 0.5)
-VerifyLabel.Position = UDim2.new(0.5, 8, 0.5, 0)
-VerifyLabel.Size = UDim2.new(1, -40, 1, 0)
+VerifyLabel.Position = UDim2.new(0.5, 10, 0.5, 0)
+VerifyLabel.Size = UDim2.new(1, -44, 0.8, 0)
 VerifyLabel.BackgroundTransparency = 1
-VerifyLabel.Font = Enum.Font.GothamBold
-VerifyLabel.Text = "Verify Key"
-VerifyLabel.TextColor3 = Color3.fromRGB(0, 0, 0)
+VerifyLabel.FontFace = FontExtraBold
+VerifyLabel.Text = "VERIFY KEY"
+VerifyLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 VerifyLabel.TextSize = 13
-VerifyLabel.Parent = VerifyBtn
+VerifyLabel.ZIndex = 10
+VerifyLabel.Parent = VerifyColor
+StyleL2Text(VerifyLabel, true)
 
-VerifyBtn.MouseEnter:Connect(function()
-    Tween(VerifyBtn, { BackgroundTransparency = 0.15 }, 0.12)
-end)
-VerifyBtn.MouseLeave:Connect(function()
-    Tween(VerifyBtn, { BackgroundTransparency = 0 }, 0.12)
-end)
-
-local function CreateIconButton(iconId, tint, offsetX)
+local function CreateBevelIconButton(iconId, tint, offsetX)
     local btn = Instance.new("TextButton")
-    btn.Size = UDim2.fromOffset(40, 40)
+    btn.Size = UDim2.fromOffset(42, 40)
     btn.AnchorPoint = Vector2.new(1, 0.5)
     btn.Position = UDim2.new(1, offsetX, 0.5, 0)
-    btn.BackgroundColor3 = CONFIG.SurfaceLight
-    btn.BackgroundTransparency = 0.15
+    btn.BackgroundTransparency = 1
     btn.BorderSizePixel = 0
     btn.Text = ""
     btn.AutoButtonColor = false
+    btn.ZIndex = 7
     btn.Parent = BtnRow
-    Corner(btn, 8)
-    local st = Stroke(btn, CONFIG.Outline, 1, 0.35)
+    AddScaleFeedback(btn, 1.06, 0.94)
+
+    local base = Instance.new("Frame")
+    base.AnchorPoint = Vector2.new(0.5, 0.5)
+    base.Position = UDim2.fromScale(0.5, 0.5)
+    base.Size = UDim2.fromScale(1, 0.94)
+    base.BackgroundColor3 = Color3.fromRGB(16, 18, 20)
+    base.BorderSizePixel = 0
+    base.ZIndex = 7
+    base.Parent = btn
+    local st = Stroke(base, Color3.fromRGB(0, 0, 0), 1.6, 0)
+
+    local col = Instance.new("Frame")
+    col.AnchorPoint = Vector2.new(0.5, 0)
+    col.Position = UDim2.fromScale(0.5, 0)
+    col.Size = UDim2.fromScale(1, 0.9)
+    col.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    col.BorderSizePixel = 0
+    col.ZIndex = 8
+    col.Parent = base
+
+    local grad = Instance.new("UIGradient")
+    grad.Color = DarkButtonGrad
+    grad.Rotation = 90
+    grad.Parent = col
+
+    local inner = Instance.new("Frame")
+    inner.AnchorPoint = Vector2.new(0.5, 0.5)
+    inner.Position = UDim2.fromScale(0.5, 0.5)
+    inner.Size = UDim2.fromScale(0.92, 0.84)
+    inner.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    inner.BackgroundTransparency = 0.82
+    inner.BorderSizePixel = 0
+    inner.ZIndex = 9
+    inner.Parent = col
 
     local icon = Instance.new("ImageLabel")
     icon.AnchorPoint = Vector2.new(0.5, 0.5)
     icon.Position = UDim2.fromScale(0.5, 0.5)
-    icon.Size = UDim2.fromScale(0.58, 0.58)
+    icon.Size = UDim2.fromScale(0.56, 0.56)
     icon.BackgroundTransparency = 1
     icon.Image = "rbxassetid://" .. iconId
     icon.ImageColor3 = tint
     icon.ScaleType = Enum.ScaleType.Fit
-    icon.Parent = btn
+    icon.ZIndex = 10
+    icon.Parent = col
 
     btn.MouseEnter:Connect(function()
-        Tween(btn, { BackgroundTransparency = 0.35 }, 0.12)
-        Tween(st, { Transparency = 0.1, Color = tint }, 0.12)
+        Tween(st, { Color = tint }, 0.12)
     end)
     btn.MouseLeave:Connect(function()
-        Tween(btn, { BackgroundTransparency = 0.15 }, 0.12)
-        Tween(st, { Transparency = 0.35, Color = CONFIG.Outline }, 0.12)
+        Tween(st, { Color = Color3.fromRGB(0, 0, 0) }, 0.12)
     end)
 
     return btn
 end
 
-local IconDiscord = CreateIconButton(ICONS.Discord, CONFIG.DiscordBlurple, 0)
-local IconWebsite = CreateIconButton(ICONS.Website, Color3.fromRGB(220, 220, 230), -44)
-local IconGetKey  = CreateIconButton(ICONS.GetKey,  CONFIG.Accent,         -88)
+local IconDiscord = CreateBevelIconButton(ICONS.Discord, CONFIG.DiscordBlurple, 0)
+local IconWebsite = CreateBevelIconButton(ICONS.Website, Color3.fromRGB(220, 235, 225), -48)
+local IconGetKey  = CreateBevelIconButton(ICONS.GetKey,  CONFIG.Accent, -96)
 
-local GameDivider = Instance.new("Frame")
-GameDivider.Size = UDim2.new(1, 0, 0, 1)
-GameDivider.BackgroundColor3 = CONFIG.Outline
-GameDivider.BackgroundTransparency = 0.35
-GameDivider.BorderSizePixel = 0
-GameDivider.Parent = GamePage
+local KeyFooter = Instance.new("Frame")
+KeyFooter.AnchorPoint = Vector2.new(0.5, 1)
+KeyFooter.Position = UDim2.new(0.5, 0, 1, -2)
+KeyFooter.Size = UDim2.new(1, -4, 0, 22)
+KeyFooter.BackgroundColor3 = Color3.fromRGB(12, 15, 14)
+KeyFooter.BackgroundTransparency = 0.2
+KeyFooter.BorderSizePixel = 0
+KeyFooter.Parent = KeyPage
+Stroke(KeyFooter, Color3.fromRGB(0, 0, 0), 1.4, 0)
+
+local KeyFooterText = Instance.new("TextLabel")
+KeyFooterText.Size = UDim2.fromScale(1, 1)
+KeyFooterText.BackgroundTransparency = 1
+KeyFooterText.FontFace = FontBold
+KeyFooterText.Text = "Key Icon: Get Key  |  Globe: Website  |  Discord: Support"
+KeyFooterText.TextColor3 = Color3.fromRGB(130, 240, 130)
+KeyFooterText.TextSize = 10
+KeyFooterText.Parent = KeyFooter
+StyleL2Text(KeyFooterText, false)
 
 local GameSectionLabel = Instance.new("TextLabel")
-GameSectionLabel.Position = UDim2.fromOffset(0, 12)
-GameSectionLabel.Size = UDim2.new(1, 0, 0, 16)
+GameSectionLabel.Position = UDim2.fromOffset(2, 4)
+GameSectionLabel.Size = UDim2.new(1, -4, 0, 16)
 GameSectionLabel.BackgroundTransparency = 1
-GameSectionLabel.Font = Enum.Font.GothamBold
-GameSectionLabel.Text = "CHOOSE GAME"
-GameSectionLabel.TextColor3 = CONFIG.Placeholder
+GameSectionLabel.FontFace = FontExtraBold
+GameSectionLabel.Text = "SELECT MODULE  //  DETECTED GAMES"
+GameSectionLabel.TextColor3 = CONFIG.Accent
 GameSectionLabel.TextSize = 11
 GameSectionLabel.TextXAlignment = Enum.TextXAlignment.Left
 GameSectionLabel.Parent = GamePage
+StyleL2Text(GameSectionLabel, false)
 
 local GameScroll = Instance.new("ScrollingFrame")
-GameScroll.Position = UDim2.fromOffset(0, 36)
-GameScroll.Size = UDim2.new(1, 0, 1, -36)
+GameScroll.Position = UDim2.fromOffset(2, 26)
+GameScroll.Size = UDim2.new(1, -4, 1, -28)
 GameScroll.BackgroundTransparency = 1
 GameScroll.BorderSizePixel = 0
 GameScroll.ScrollBarThickness = 3
 GameScroll.ScrollBarImageColor3 = CONFIG.Accent
-GameScroll.ScrollBarImageTransparency = 0.5
+GameScroll.ScrollBarImageTransparency = 0.2
 GameScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
 GameScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
 GameScroll.Parent = GamePage
@@ -654,41 +1012,61 @@ GameLayout.Padding = UDim.new(0, 8)
 GameLayout.SortOrder = Enum.SortOrder.LayoutOrder
 GameLayout.Parent = GameScroll
 
+local GamePad = Instance.new("UIPadding")
+GamePad.PaddingTop = UDim.new(0, 2)
+GamePad.PaddingBottom = UDim.new(0, 4)
+GamePad.PaddingLeft = UDim.new(0, 2)
+GamePad.PaddingRight = UDim.new(0, 6)
+GamePad.Parent = GameScroll
+
 local function CreateGameCard(entry, index, isCurrent)
     local card = Instance.new("TextButton")
-    card.Size = UDim2.new(1, -6, 0, 62)
-    card.BackgroundColor3 = isCurrent and CONFIG.SurfaceLight or CONFIG.Surface
-    card.BackgroundTransparency = 0.15
+    card.Size = UDim2.new(1, 0, 0, 60)
+    card.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    card.BackgroundTransparency = isCurrent and 0.06 or 0.45
     card.BorderSizePixel = 0
     card.Text = ""
     card.AutoButtonColor = false
     card.LayoutOrder = index
     card.Parent = GameScroll
-    Corner(card, 10)
-    local st = Stroke(
-        card,
-        isCurrent and CONFIG.Accent or CONFIG.Outline,
-        1,
-        isCurrent and 0.15 or 0.35
-    )
+
+    local st = Stroke(card, isCurrent and CONFIG.Accent or Color3.fromRGB(0, 0, 0), 1.8, 0)
+
+    local rowGrad = Instance.new("UIGradient")
+    rowGrad.Color = isCurrent and RowActiveGrad or RowPlateGrad
+    rowGrad.Rotation = 90
+    rowGrad.Parent = card
+
+    local innerBevel = Instance.new("Frame")
+    innerBevel.AnchorPoint = Vector2.new(0.5, 0.5)
+    innerBevel.Position = UDim2.fromScale(0.5, 0.5)
+    innerBevel.Size = UDim2.new(1, -4, 1, -4)
+    innerBevel.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    innerBevel.BackgroundTransparency = 0.72
+    innerBevel.BorderSizePixel = 0
+    innerBevel.ZIndex = 2
+    innerBevel.Parent = card
 
     local iconHolder = Instance.new("Frame")
-    iconHolder.Size = UDim2.fromOffset(50, 50)
-    iconHolder.Position = UDim2.fromOffset(6, 6)
-    iconHolder.BackgroundColor3 = CONFIG.SurfaceLight
+    iconHolder.AnchorPoint = Vector2.new(0, 0.5)
+    iconHolder.Position = UDim2.new(0, 8, 0.5, 0)
+    iconHolder.Size = UDim2.fromOffset(44, 44)
+    iconHolder.BackgroundColor3 = Color3.fromRGB(10, 14, 12)
     iconHolder.BorderSizePixel = 0
+    iconHolder.ZIndex = 3
     iconHolder.Parent = card
-    Corner(iconHolder, 8)
+    Stroke(iconHolder, isCurrent and CONFIG.Accent or Color3.fromRGB(45, 55, 48), 1.4, 0)
 
     local icon = Instance.new("ImageLabel")
     icon.AnchorPoint = Vector2.new(0.5, 0.5)
     icon.Position = UDim2.fromScale(0.5, 0.5)
-    icon.Size = UDim2.fromScale(0.94, 0.94)
+    icon.Size = UDim2.fromScale(0.92, 0.92)
     icon.BackgroundTransparency = 1
     icon.Image = "rbxthumb://type=GameIcon&id=" .. tostring(entry.PlaceId) .. "&w=150&h=150"
+    icon.ImageTransparency = isCurrent and 0 or 0.45
     icon.ScaleType = Enum.ScaleType.Crop
+    icon.ZIndex = 4
     icon.Parent = iconHolder
-    Corner(icon, 7)
 
     task.spawn(function()
         local ok, info = pcall(MarketplaceService.GetProductInfo, MarketplaceService, entry.PlaceId)
@@ -698,75 +1076,85 @@ local function CreateGameCard(entry, index, isCurrent)
     end)
 
     local nameLabel = Instance.new("TextLabel")
-    nameLabel.Position = UDim2.fromOffset(66, 12)
-    nameLabel.Size = UDim2.new(1, -130, 0, 20)
+    nameLabel.Position = UDim2.fromOffset(60, 10)
+    nameLabel.Size = UDim2.new(1, -148, 0, 20)
     nameLabel.BackgroundTransparency = 1
-    nameLabel.Font = Enum.Font.GothamBold
+    nameLabel.FontFace = FontExtraBold
     nameLabel.Text = entry.Name or "Unknown"
-    nameLabel.TextColor3 = CONFIG.Text
+    nameLabel.TextColor3 = isCurrent and CONFIG.Text or CONFIG.Placeholder
     nameLabel.TextSize = 14
     nameLabel.TextXAlignment = Enum.TextXAlignment.Left
     nameLabel.TextTruncate = Enum.TextTruncate.AtEnd
+    nameLabel.ZIndex = 4
     nameLabel.Parent = card
+    StyleL2Text(nameLabel, isCurrent)
 
     local subLabel = Instance.new("TextLabel")
-    subLabel.Position = UDim2.fromOffset(66, 33)
-    subLabel.Size = UDim2.new(1, -130, 0, 16)
+    subLabel.Position = UDim2.fromOffset(60, 32)
+    subLabel.Size = UDim2.new(1, -148, 0, 16)
     subLabel.BackgroundTransparency = 1
-    subLabel.Font = Enum.Font.GothamMedium
-    subLabel.Text = entry.Subtitle or "Ready to launch"
+    subLabel.FontFace = FontBold
+    subLabel.RichText = true
+    subLabel.Text = isCurrent
+        and ('<font color="#3AFF37">DETECTED</font> | ' .. tostring(entry.Subtitle or "Ready to launch"))
+        or ('<font color="#9AA3B5">LOCKED</font> | ' .. tostring(entry.Subtitle or "Join game to unlock"))
     subLabel.TextColor3 = CONFIG.Placeholder
-    subLabel.TextSize = 11
+    subLabel.TextSize = 10
     subLabel.TextXAlignment = Enum.TextXAlignment.Left
     subLabel.TextTruncate = Enum.TextTruncate.AtEnd
+    subLabel.ZIndex = 4
     subLabel.Parent = card
+    StyleL2Text(subLabel, false)
 
-    local playIcon = Instance.new("ImageLabel")
-    playIcon.AnchorPoint = Vector2.new(1, 0.5)
-    playIcon.Position = UDim2.new(1, -14, 0.5, 0)
-    playIcon.Size = UDim2.fromOffset(22, 22)
-    playIcon.BackgroundTransparency = 1
-    playIcon.Image = "rbxassetid://" .. ICONS.Play
-    playIcon.ImageColor3 = CONFIG.Accent
-    playIcon.ImageTransparency = 0.2
-    playIcon.ScaleType = Enum.ScaleType.Fit
-    playIcon.Parent = card
+    local actionBadge = Instance.new("Frame")
+    actionBadge.AnchorPoint = Vector2.new(1, 0.5)
+    actionBadge.Position = UDim2.new(1, -8, 0.5, 0)
+    actionBadge.Size = UDim2.fromOffset(74, 30)
+    actionBadge.BackgroundColor3 = isCurrent and Color3.fromRGB(12, 85, 12) or Color3.fromRGB(18, 20, 22)
+    actionBadge.BorderSizePixel = 0
+    actionBadge.ZIndex = 4
+    actionBadge.Parent = card
+    Stroke(actionBadge, Color3.fromRGB(0, 0, 0), 1.6, 0)
 
-if isCurrent then
-    local badge = Instance.new("TextLabel")
-    badge.AnchorPoint = Vector2.new(1, 0)
-    badge.Position = UDim2.new(1, -14, 0, 8)
-    badge.Size = UDim2.fromOffset(120, 14)
-    badge.BackgroundTransparency = 1
-    badge.Font = Enum.Font.GothamBold
-    badge.Text = "CURRENT GAME"
-    badge.TextColor3 = CONFIG.Accent
-    badge.TextSize = 10
-    badge.TextXAlignment = Enum.TextXAlignment.Right
-    badge.Parent = card
+    local actionColor = Instance.new("Frame")
+    actionColor.AnchorPoint = Vector2.new(0.5, 0)
+    actionColor.Position = UDim2.fromScale(0.5, 0)
+    actionColor.Size = UDim2.fromScale(1, 0.9)
+    actionColor.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    actionColor.BorderSizePixel = 0
+    actionColor.ZIndex = 5
+    actionColor.Parent = actionBadge
 
-    playIcon.Position = UDim2.new(1, -14, 0.5, 7)
-else
-    card.BackgroundTransparency = 0.55
-    icon.ImageTransparency = 0.5
-    iconHolder.BackgroundTransparency = 0.4
-    nameLabel.TextColor3 = CONFIG.Placeholder
-    subLabel.TextColor3 = Color3.fromRGB(90, 90, 100)
-    playIcon.Image = "rbxassetid://" .. ICONS.Lock
-    playIcon.ImageColor3 = CONFIG.Placeholder
-    playIcon.ImageTransparency = 0.4
-    st.Transparency = 0.75
-end
+    local actionGrad = Instance.new("UIGradient")
+    actionGrad.Color = isCurrent and NeonButtonGrad or DarkButtonGrad
+    actionGrad.Rotation = 90
+    actionGrad.Parent = actionColor
 
-if isCurrent then
-        card.MouseEnter:Connect(function()
-            Tween(card, { BackgroundTransparency = 0.35 }, 0.15)
-            Tween(st, { Transparency = 0.1, Color = CONFIG.Accent }, 0.15)
-        end)
-        card.MouseLeave:Connect(function()
-            Tween(card, { BackgroundTransparency = 0.15 }, 0.15)
-            Tween(st, { Transparency = 0.15, Color = CONFIG.Accent }, 0.15)
-        end)
+    local actionInner = Instance.new("Frame")
+    actionInner.AnchorPoint = Vector2.new(0.5, 0.5)
+    actionInner.Position = UDim2.fromScale(0.5, 0.5)
+    actionInner.Size = UDim2.fromScale(0.95, 0.84)
+    actionInner.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    actionInner.BackgroundTransparency = 0.86
+    actionInner.BorderSizePixel = 0
+    actionInner.ZIndex = 6
+    actionInner.Parent = actionColor
+
+    local actionText = Instance.new("TextLabel")
+    actionText.AnchorPoint = Vector2.new(0.5, 0.5)
+    actionText.Position = UDim2.fromScale(0.5, 0.5)
+    actionText.Size = UDim2.fromScale(0.92, 0.8)
+    actionText.BackgroundTransparency = 1
+    actionText.FontFace = FontExtraBold
+    actionText.Text = isCurrent and "LAUNCH" or "LOCKED"
+    actionText.TextColor3 = isCurrent and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(150, 155, 160)
+    actionText.TextSize = 11
+    actionText.ZIndex = 7
+    actionText.Parent = actionColor
+    StyleL2Text(actionText, isCurrent)
+
+    if isCurrent then
+        AddScaleFeedback(card, 1.015, 0.98)
     end
 
     return card
@@ -809,16 +1197,17 @@ local function BuildGameList()
         local empty = Instance.new("TextLabel")
         empty.Size = UDim2.new(1, 0, 0, 60)
         empty.BackgroundTransparency = 1
-        empty.Font = Enum.Font.GothamMedium
-        empty.Text = "No games available."
+        empty.FontFace = FontBold
+        empty.Text = "No games registered in L2HUB_GAMES."
         empty.TextColor3 = CONFIG.Placeholder
-        empty.TextSize = 13
+        empty.TextSize = 12
         empty.LayoutOrder = 1
         empty.Parent = GameScroll
+        StyleL2Text(empty, false)
         return
     end
 
-        local ordered, current = GetOrderedGames()
+    local ordered, current = GetOrderedGames()
     for i, entry in ipairs(ordered) do
         local isCurrent = (entry == current)
         local card = CreateGameCard(entry, i, isCurrent)
@@ -826,8 +1215,8 @@ local function BuildGameList()
         if isCurrent then
             card.MouseButton1Click:Connect(function()
                 FireVerified(entry)
-                Tween(Root, { BackgroundTransparency = 1 }, 0.25)
-                task.wait(0.3)
+                Tween(UIScale, { Scale = 0 }, 0.22, Enum.EasingStyle.Back, Enum.EasingDirection.In)
+                task.wait(0.25)
                 ScreenGui:Destroy()
             end)
         end
@@ -839,57 +1228,9 @@ BuildGameList()
 local function ShowGamePage()
     KeyPage.Visible = false
     GamePage.Visible = true
-    GamePage.BackgroundTransparency = 1
     Tween(UIScaleHolder, {
         Size = UDim2.fromOffset(CONFIG.ExpandedSize.X, CONFIG.ExpandedSize.Y)
-    }, 0.4, Enum.EasingStyle.Quint)
-end
-
-local ToastHolder = Instance.new("Frame")
-ToastHolder.AnchorPoint = Vector2.new(0.5, 0)
-ToastHolder.Position = UDim2.new(0.5, 0, 0, 10)
-ToastHolder.Size = UDim2.new(1, -28, 0, 38)
-ToastHolder.BackgroundColor3 = CONFIG.Surface
-ToastHolder.BackgroundTransparency = 1
-ToastHolder.BorderSizePixel = 0
-ToastHolder.ZIndex = 50
-ToastHolder.Parent = Root
-Corner(ToastHolder, 8)
-local ToastStroke = Stroke(ToastHolder, CONFIG.Outline, 1, 1)
-ToastStroke.Transparency = 1
-
-local ToastLabel = Instance.new("TextLabel")
-ToastLabel.Size = UDim2.new(1, -20, 1, 0)
-ToastLabel.Position = UDim2.fromOffset(10, 0)
-ToastLabel.BackgroundTransparency = 1
-ToastLabel.Font = Enum.Font.GothamMedium
-ToastLabel.Text = ""
-ToastLabel.TextColor3 = CONFIG.Text
-ToastLabel.TextSize = 13
-ToastLabel.TextXAlignment = Enum.TextXAlignment.Center
-ToastLabel.TextWrapped = true
-ToastLabel.Parent = ToastHolder
-
-local toastBusy = false
-local function Toast(text, ok)
-    if toastBusy then return end
-    toastBusy = true
-
-    ToastLabel.Text = text
-    ToastLabel.TextColor3 = ok == false and Color3.fromRGB(255, 120, 120) or CONFIG.Text
-    ToastStroke.Color = ok == false and Color3.fromRGB(255, 120, 120) or CONFIG.Accent
-
-    Tween(ToastHolder, { BackgroundTransparency = 0.05 }, 0.2)
-    Tween(ToastStroke, { Transparency = 0.35 }, 0.2)
-    Tween(ToastLabel, { TextTransparency = 0 }, 0.2)
-
-    task.delay(2.4, function()
-        Tween(ToastHolder, { BackgroundTransparency = 1 }, 0.25)
-        Tween(ToastStroke, { Transparency = 1 }, 0.25)
-        Tween(ToastLabel, { TextTransparency = 1 }, 0.25)
-        task.wait(0.3)
-        toastBusy = false
-    end)
+    }, 0.35, Enum.EasingStyle.Quint)
 end
 
 local function NormalizeKey(s)
@@ -910,34 +1251,34 @@ local function PerformVerify(rawKey, isAuto)
     end
 
     verifying = true
-    VerifyLabel.Text = "Verifying..."
+    VerifyLabel.Text = "VERIFYING..."
 
     task.spawn(function()
         task.wait(isAuto and 0.3 or 0.9)
-    if typed == NormalizeKey(CONFIG.Key) then
-        SaveKey(typed)
-        Toast(isAuto and "Key restored. Access granted." or "Access granted.", true)
-        VerifyLabel.Text = "Verified"
-        task.wait(0.5)
+        if typed == NormalizeKey(CONFIG.Key) then
+            SaveKey(typed)
+            Toast(isAuto and "Key restored. Access granted." or "Access granted.", true)
+            VerifyLabel.Text = "VERIFIED"
+            task.wait(0.5)
 
-        if autoExecEnabled then
-            local _, current = GetOrderedGames()
-            if current then
-                Toast("Auto-Executing: " .. tostring(current.Name), true)
-                task.wait(0.35)
-                FireVerified(current)
-                Tween(Root, { BackgroundTransparency = 1 }, 0.25)
-                task.wait(0.3)
-                ScreenGui:Destroy()
+            if autoExecEnabled then
+                local _, current = GetOrderedGames()
+                if current then
+                    Toast("Auto-Executing: " .. tostring(current.Name), true)
+                    task.wait(0.35)
+                    FireVerified(current)
+                    Tween(UIScale, { Scale = 0 }, 0.22, Enum.EasingStyle.Back, Enum.EasingDirection.In)
+                    task.wait(0.25)
+                    ScreenGui:Destroy()
+                else
+                    ShowGamePage()
+                end
             else
                 ShowGamePage()
             end
         else
-            ShowGamePage()
-        end
-    else
             Toast("Invalid key. Please try again.", false)
-            VerifyLabel.Text = "Verify Key"
+            VerifyLabel.Text = "VERIFY KEY"
             verifying = false
             if isAuto then ClearKey() end
         end
@@ -966,11 +1307,11 @@ end)
 do
     local dragging, dragStart, startPos = false, nil, nil
     local dragArea = Instance.new("TextButton")
-    dragArea.Size = UDim2.new(1, -50, 0, 110)
+    dragArea.Size = UDim2.new(1, -40, 0, 38)
     dragArea.BackgroundTransparency = 1
     dragArea.Text = ""
-    dragArea.ZIndex = 6
-    dragArea.Parent = Root
+    dragArea.ZIndex = 15
+    dragArea.Parent = TopBar
 
     dragArea.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1
@@ -1001,12 +1342,9 @@ do
     end)
 end
 
-Root.BackgroundTransparency = 1
-Tween(Root, { BackgroundTransparency = 0.05 }, 0.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
-
-task.delay(0.5, function()
-    pcall(function() KeyInput:CaptureFocus() end)
-end)
+Root.BackgroundTransparency = 0.22
+KeyPage.Visible = true
+GamePage.Visible = false
 
 task.spawn(function()
     local saved = LoadKey()

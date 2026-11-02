@@ -126,7 +126,7 @@ local GAMES = {
 }
 
 local CONFIG = {
-    LoaderURL   = "https://cdn.jsdelivr.net/gh/euloxa/Universal@refs/heads/main/loader.lua",
+    LoaderURL   = "https://raw.githubusercontent.com/euloxa/Universal/refs/heads/main/loader.lua",
     VerifyKey   = "L2-HUB",
     NotifyTime  = 4,
     Verbose     = true,
@@ -199,20 +199,24 @@ end
 local function LoadLoader()
     Log("Fetching loader UI...")
 
-    local ok, source = pcall(game.HttpGet, game, CONFIG.LoaderURL)
+    local url = CONFIG.LoaderURL .. "?t=" .. tostring(os.time())
+    local ok, source = pcall(game.HttpGet, game, url)
     if not ok or type(source) ~= "string" or #source < 100 then
+        warn("[L2-HUB] Failed to fetch loader UI")
         Notify("L2-HUB", "Failed to fetch loader UI.", 5)
         return false
     end
 
     local chunk, err = loadstring(source)
     if not chunk then
+        warn("[L2-HUB] Loader compile error: " .. tostring(err))
         Notify("L2-HUB", "Loader compile error: " .. tostring(err), 6)
         return false
     end
 
     local ok2, err2 = pcall(chunk)
     if not ok2 then
+        warn("[L2-HUB] Loader runtime error: " .. tostring(err2))
         Notify("L2-HUB", "Loader runtime error: " .. tostring(err2), 6)
         return false
     end
